@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><title>TechStore Cloud - Produtos</title>
+  <style>body{font-family:sans-serif;max-width:640px;margin:2rem auto}input{display:block;margin:.4rem 0;padding:.4rem;width:100%}li{margin:.3rem 0}</style>
+</head>
+<body>
+  <h1>Cadastro de Produtos</h1>
+  <form id="f">
+    <input name="sku" placeholder="SKU" required>
+    <input name="name" placeholder="Nome" required>
+    <input name="price" type="number" step="0.01" placeholder="Preço" required>
+    <input name="stock" type="number" placeholder="Estoque" required>
+    <button>Cadastrar</button>
+  </form>
+  <ul id="list"></ul>
+  <script>
+    const API = "https://<application-gateway>/api/products"; // trocar pela URL do Application Gateway
+    async function load() {
+      const r = await fetch(API); const items = await r.json();
+      list.innerHTML = items.map(p => `<li><b>${p.name}</b> (${p.sku}) - R$ ${p.price} - estoque ${p.stock}</li>`).join("");
+    }
+    f.onsubmit = async e => {
+      e.preventDefault();
+      const d = Object.fromEntries(new FormData(f));
+      const r = await fetch(API, { method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ sku:d.sku, name:d.name, price:+d.price, stock:+d.stock }) });
+      if (!r.ok) alert(await r.text()); else { f.reset(); load(); }
+    };
+    load();
+  </script>
+</body>
+</html>
